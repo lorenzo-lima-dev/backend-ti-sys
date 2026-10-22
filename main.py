@@ -1,25 +1,20 @@
+from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from database.conn import iniciar_pool, fechar_pool
 
-import asyncpg
-from fastapi import FastAPI, Request
-
+from rotas.inventario import inventario
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.pool = await asyncpg.create_pool(
-        host= "127.0.0.1",
-        port="5432",
-        database="gabardo",
-        user="postgres",
-        password="##ççGabardo!1",
-        min_size=10,
-        max_size=30,
-        command_timeout=10,
-    )
-    try:
-        yield
-    finally:
-        await app.state.pool.close()
+    await iniciar_pool()
+    yield
+    await fechar_pool()
 
+app = FastAPI(
+    title="Backend TI Sys",
+    description="API para recebimento de dados pesados e gestão de chamados",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
-app = FastAPI(lifespan=lifespan)
+app.include_router(inventario.router)

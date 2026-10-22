@@ -1,16 +1,9 @@
-import asyncio
-import bcrypt
+from passlib.context import CryptContext
 
-async def hash_senha(senha: str, rounds: int = 12) -> bytes:
-    return await asyncio.to_thread(
-        bcrypt.hashpw,
-        senha.encode("utf-8"),
-        bcrypt.gensalt(rounds=rounds)
-    )
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-async def verificar_senha(senha: str, hash_senha: bytes) -> bool:
-    return await asyncio.to_thread(
-        bcrypt.checkpw,
-        senha.encode("utf-8"),
-        hash_senha
-    )
+def gerar_hash(senha_plana: str) -> str:
+    return pwd_context.hash(senha_plana)
+
+def verificar_senha(senha_plana: str, hash_salvo: str) -> bool:
+    return pwd_context.verify(senha_plana, hash_salvo)
