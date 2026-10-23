@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 import asyncpg
 from database.conn import get_db
+from utils.auth import validar_api_key # <-- Adicione esta importação
+
 
 router = APIRouter(
     prefix="/api/v1/inventario",
@@ -101,7 +103,7 @@ class PayloadSchema(BaseModel):
 class InventarioRequest(BaseModel):
     payload: PayloadSchema
 
-@router.post("/")
+@router.post("/", dependencies=[Depends(validar_api_key)])
 async def receber_inventario(request: InventarioRequest, db: asyncpg.Connection = Depends(get_db)):
     p = request.payload
 
